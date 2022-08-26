@@ -38,3 +38,32 @@ class TitleFieldTests(unittest.TestCase):
             title.dict(),
             {"title": self.valid_title, "subtitle": self.valid_subtitle}
         )
+
+
+class AuthorsFieldTests(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self.a_1 = "Kahneman, Daniel"
+        self.a_2 = "Sibony, Oliver"
+
+    def test_create_authors(self):
+        a = fields.Authors(authors=[self.a_1])
+        self.assertIsInstance(a, fields.Authors)
+        self.assertIsInstance(a[0], fields.Contributor)
+        self.assertEqual(a[0].name, self.a_1)
+
+    def test_create_multiple_authors(self):
+        a = fields.Authors(authors=[self.a_1, self.a_2])
+        self.assertEqual(len(a), 2)
+
+    def test_create_authors_defaults_to_author(self):
+        a = fields.Authors(authors=[self.a_1])
+        self.assertEqual(a[0].role, "author")
+
+    def test_authors_requires_name(self):
+        with self.assertRaises(ValueError):
+            fields.Authors(authors=None)
+        with self.assertRaises(ValueError):
+            fields.Authors(authors=[None])
+        with self.assertRaises(ValueError):
+            fields.Authors(authors=[""])

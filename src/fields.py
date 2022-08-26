@@ -22,10 +22,40 @@ class Title(BaseModel):
         return subtitle
 
 
-class Authors:
+class Contributor(BaseModel):
+    name: str
+    role: str = "author"
 
-    def __init__(self, authors, roles):
-        self.authors = authors
-        self.roles = roles
+    @validator("name")
+    def check_name(cls, name):
+        if name is None or name == "":
+            raise ValueError('name cannot be NULL or empty')
+        if ", " not in name:
+            raise ValueError(f'name must be last, first. Not {name}')
+        return name.strip()
 
 
+class Authors(BaseModel):
+    authors: list[Contributor]
+
+    ###
+    # Validators
+    ###
+
+    @validator("authors", pre=True, each_item=True)
+    def parse_authors(cls, v):
+        if isinstance(v, str):
+            v = {"name": v}
+        if isinstance(v, tuple):
+            v = dict(zip(Contributor.__fields__, v))
+        return v
+
+    ###
+    # Accessors
+    ###
+
+    def __getitem__(self, item):
+        return self.authors[item]
+
+    def __len__(self):
+        return len(self.authors)
