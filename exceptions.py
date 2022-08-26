@@ -1,0 +1,4 @@
+
+
+class FieldError(ValueError):
+    pass
